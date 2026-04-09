@@ -1,8 +1,12 @@
-This is an anonymized version of the **HAIMEDA** application.
+This is an anonymized version of the **HAIMEDA** (Hybrid AI for Medical Device Assessment) application. It was developed in collaboration with a medical device surveyor and functions as an expert system for creating medical device damage reports.
+
 
 For more details on the system, see `HAIMEDA_documentation.md`.
 
+
 Information regarding Fine-Tuning and System Configuration can be found in `HAIMEDA_technical_documentation.pdf`.
+
+
 
 ---
 
