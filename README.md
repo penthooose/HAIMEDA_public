@@ -1,3 +1,7 @@
+This is an anonymized version of the HAIMEDA application.
+For more details on the system, see HAIMEDA_documentation.md.
+
+
 # HaimedaCore
 
 To start the Phoenix server:
@@ -6,4 +10,5 @@ To start the Phoenix server:
   * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+
 
