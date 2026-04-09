@@ -1,8 +1,12 @@
-This is an anonymized version of the HAIMEDA application.
-For more details on the system, see HAIMEDA_documentation.md.
+This is an anonymized version of the **HAIMEDA** application.
 
+For more details on the system, see `HAIMEDA_documentation.md`.
 
-# HaimedaCore
+Information regarding Fine-Tuning and System Configuration can be found in `HAIMEDA_technical_documentation.pdf`.
+
+---
+
+### HaimedaCore
 
 To start the Phoenix server:
 
