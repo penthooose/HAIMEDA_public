@@ -87,9 +87,6 @@ Run all commands from the **repository root**.
 
    (or `iex -S mix phx.server`)
 
-4. Open:
-
-   [`http://localhost:4000`](http://localhost:4000)
 
 ## Notes / Troubleshooting
 
