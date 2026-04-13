@@ -40,9 +40,6 @@ defmodule HaimedaCore.PerformanceMonitor do
             )
 
           exit_code == 0 && String.trim(output) != ""
-
-        _ ->
-          false
       end
     rescue
       _ -> false
@@ -350,13 +347,9 @@ defmodule HaimedaCore.PerformanceMonitor do
 
   defp get_memory_usage do
     # Get current process memory usage in MB
-    case :erlang.memory(:total) do
-      memory_bytes when is_integer(memory_bytes) ->
-        Float.round(memory_bytes / 1_048_576, 2)
-
-      _ ->
-        0.0
-    end
+    :erlang.memory(:total)
+    |> Kernel./(1_048_576)
+    |> Float.round(2)
   end
 
   defp get_cpu_usage do
@@ -464,10 +457,15 @@ defmodule HaimedaCore.PerformanceMonitor do
           # Non-Windows platforms - try using OS_Mon if available
           case :application.get_application(:os_mon) do
             {:ok, _} ->
-              case :cpu_sup.util() do
-                {:badrpc, _} -> 0.0
-                cpu_util when is_number(cpu_util) -> Float.round(cpu_util, 2)
-                _ -> 0.0
+              if Code.ensure_loaded?(:cpu_sup) and function_exported?(:cpu_sup, :util, 0) do
+                case apply(:cpu_sup, :util, []) do
+                  {:badrpc, _} -> 0.0
+                  cpu_util when is_number(cpu_util) -> Float.round(cpu_util, 2)
+                  _ -> 0.0
+                end
+              else
+                Logger.debug(":cpu_sup.util/0 not available on this system")
+                0.0
               end
 
             _ ->
@@ -658,16 +656,6 @@ defmodule HaimedaCore.PerformanceMonitor do
   defp format_memory_change(mb) when mb < 0, do: "#{mb}MB"
   defp format_memory_change(_), do: "0MB"
 
-  # Format CPU usage information showing before and after values
-  defp format_cpu_usage(start_cpu, end_cpu) do
-    # Get CPU utilization percentages
-    start_percentage = extract_cpu_percentage(start_cpu)
-    end_percentage = extract_cpu_percentage(end_cpu)
-
-    # Format the display string to show change in utilization
-    "#{start_percentage}% → #{end_percentage}%"
-  end
-
   # Format CPU usage with peak information and core count
   defp format_cpu_usage_with_peak_and_cores(start_cpu, end_cpu, peak_cpu) do
     # Get CPU utilization percentages
@@ -681,21 +669,6 @@ defmodule HaimedaCore.PerformanceMonitor do
 
     # Format the display string to show change and peak in utilization
     "#{start_percentage}% → #{end_percentage}% (peak: #{peak_percentage}%)#{cores_info}"
-  end
-
-  # Format GPU usage information showing before and after values
-  defp format_gpu_usage(start_gpu, end_gpu) do
-    # Extract utilization percentages
-    start_util = start_gpu.utilization
-    end_util = end_gpu.utilization
-
-    # Extract memory usage values
-    start_mem = start_gpu.memory_used_mb
-    end_mem = end_gpu.memory_used_mb
-    total_mem = end_gpu.memory_total_mb
-
-    # Format string to show changes in utilization and memory
-    "#{start_util}% → #{end_util}%, VRAM: #{Float.round(start_mem, 0)}MB → #{Float.round(end_mem, 0)}MB (of #{Float.round(total_mem, 0)}MB)"
   end
 
   # Format GPU usage with peak information - clarifying that utilization % is separate from VRAM

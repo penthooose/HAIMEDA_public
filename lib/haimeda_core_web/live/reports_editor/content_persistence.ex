@@ -22,7 +22,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.ContentPersistence do
           if Map.has_key?(verified_content, "type") && Map.has_key?(verified_content, "content") do
             verified_content
           else
-            Logger.warn("Fixed malformed content structure during save")
+            Logger.warning("Fixed malformed content structure during save")
             create_default_formatted_content(tab.content || "")
           end
 
@@ -993,7 +993,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.ContentPersistence do
                           sanitize_selection_lists(decoded)
                         else
                           # Create default from plain content if structure is wrong
-                          Logger.warn("Formatted content has invalid structure, regenerating")
+                          Logger.warning("Formatted content has invalid structure, regenerating")
                           create_default_formatted_content(version_data["plain_content"] || "")
                         end
 
@@ -1008,7 +1008,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.ContentPersistence do
                       sanitize_selection_lists(raw_fc)
                     else
                       # Invalid structure, regenerate
-                      Logger.warn(
+                      Logger.warning(
                         "Formatted content has invalid structure (as map), regenerating"
                       )
 

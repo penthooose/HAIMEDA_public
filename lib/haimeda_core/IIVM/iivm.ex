@@ -15,11 +15,10 @@ defmodule IIV do
     input_info_updated = combine_meta_data(input_info)
     filename_class = classify_filename(input_info.title)
 
-    result_verification =
-      SymbolicPreProcessor.verify_LLM_input(
-        input_info_updated,
-        filename_class
-      )
+    SymbolicPreProcessor.verify_LLM_input(
+      input_info_updated,
+      filename_class
+    )
   end
 
   def post_process_content(input_info, output_content, mode, verifier_config) do
@@ -41,15 +40,14 @@ defmodule IIV do
     previous_content =
       if input_info.previous_content == nil, do: nil, else: input_info.previous_content
 
-    result_verification =
-      HybridPostProcessor.post_process_llm_output(
-        device_and_basic_meta_data,
-        chapter_info,
-        previous_content,
-        parties_statements,
-        llm_output,
-        verifier_config
-      )
+    HybridPostProcessor.post_process_llm_output(
+      device_and_basic_meta_data,
+      chapter_info,
+      previous_content,
+      parties_statements,
+      llm_output,
+      verifier_config
+    )
   end
 
   def post_process_textarea_content(input_info, textarea_content, verifier_config) do
@@ -61,15 +59,14 @@ defmodule IIV do
     previous_content =
       if input_info.previous_content == nil, do: nil, else: input_info.previous_content
 
-    result_verification =
-      HybridPostProcessor.post_process_textarea_content(
-        device_and_basic_meta_data,
-        chapter_info,
-        previous_content,
-        parties_statements,
-        textarea_content,
-        verifier_config
-      )
+    HybridPostProcessor.post_process_textarea_content(
+      device_and_basic_meta_data,
+      chapter_info,
+      previous_content,
+      parties_statements,
+      textarea_content,
+      verifier_config
+    )
   end
 
   @doc """
@@ -97,7 +94,6 @@ defmodule IIV do
     {combined_info, parties}
   end
 
-  @deprecated
   def get_meta_data_for_categories(input_info) do
     title = input_info.title
     meta_data = input_info.meta_data

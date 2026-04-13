@@ -284,8 +284,14 @@ defmodule LLMService do
     # Use module attribute for client to avoid recreating for each call
     client = get_ollama_client()
 
-    case Ollama.embeddings(client, model: model_name, prompt: content) do
+    case Ollama.embed(client, model: model_name, input: content) do
       {:ok, %{"embedding" => embedding}} ->
+        embedding =
+          case embedding do
+            [first | _rest] when is_list(first) -> first
+            value -> value
+          end
+
         # Return the embedding vector directly, not wrapped in {:ok, embedding}
         embedding
 
@@ -372,7 +378,7 @@ defmodule LLMService do
     results =
       Enum.map(models, fn model_path ->
         case OllamaService.integrate_gguf_in_ollama(model_path, overwrite, @default_parameters) do
-          {:ok, message} ->
+          {:ok, _message} ->
             IO.puts("Successfully integrated model: #{model_path}")
             {:ok, model_path}
 

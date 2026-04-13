@@ -1,9 +1,9 @@
 defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
-  alias HaimedaCore.Report
   alias HaimedaCoreWeb.ReportsEditor.ContentPersistence
   alias HaimedaCoreWeb.ReportsEditor.TipTapSnippets
   require Logger
 
+  import Phoenix.Component, only: [assign: 2, assign: 3]
   import Phoenix.LiveView
 
   # Make this function public for external use
@@ -106,7 +106,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
   end
 
   # Helper function to handle selection entity updates
-  @impl true
   def handle_event(
         "selection-entity-update",
         %{"entity_id" => entity_id, "deleted" => deleted, "confirmed" => confirmed},
@@ -277,7 +276,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
   end
 
   # Consolidated handler for selection-entity-update (accepts different param shapes)
-  @impl true
   def handle_event("selection-entity-update", params, socket) do
     entity_id =
       params
@@ -353,7 +351,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     end
   end
 
-  @impl true
   def handle_event(
         "content-updated",
         %{
@@ -439,7 +436,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     end
   end
 
-  @impl true
   def handle_event(
         "content-updated",
         %{"content" => content, "formatted_content" => formatted_content},
@@ -521,9 +517,8 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     end
   end
 
-  @impl true
   def handle_info(
-        {:content_save_complete, tab_id, _content, formatted_content_from_save},
+        {:content_save_complete, tab_id, _content, _formatted_content_from_save},
         socket
       ) do
     # Instead of using the tab from memory, reload it directly from MongoDB
@@ -667,7 +662,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     formatted_content
   end
 
-  @impl true
   def handle_event("force_refresh_editor", %{"tab_id" => tab_id}, socket) do
     tab = Enum.find(socket.assigns.tabs, &(&1.id == tab_id))
 
@@ -713,7 +707,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
 
   defp check_for_hardbreaks(_), do: false
 
-  @impl true
   def handle_event("entity-deletion", %{"entity_id" => entity_id}, socket) do
     # This is the handler for entity deletion
     Logger.info("Entity marked for deletion: #{entity_id}")
@@ -737,7 +730,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     {:noreply, socket}
   end
 
-  @impl true
   def handle_event(
         "entity-replace",
         %{"entity_id" => entity_id, "replacement" => replacement, "original" => original},
@@ -758,7 +750,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     {:noreply, socket}
   end
 
-  @impl true
   def handle_event(
         "entity-replace",
         %{"entity_id" => entity_id, "replacement" => replacement},
@@ -779,7 +770,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     {:noreply, socket}
   end
 
-  @impl true
   def handle_event("entity-restore", %{"entity_id" => entity_id}, socket) do
     # This handles entity restoration (undoing deletion)
     Logger.info("Entity restore request received for: #{entity_id}")
@@ -793,12 +783,10 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     {:noreply, socket}
   end
 
-  @impl true
   def handle_event("entity-marked-for-deletion", %{"index" => entity_id}, socket) do
     handle_event("entity-deletion", %{"entity_id" => entity_id}, socket)
   end
 
-  @impl true
   def handle_info({:tiptap_entity_marked_for_deletion, tab_id, entity_id}, socket) do
     # Log the entity marked for deletion
     Logger.info("Entity #{entity_id} marked for deletion in tab #{tab_id}")
@@ -849,7 +837,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     end
   end
 
-  @impl true
   def handle_event("selection-entity-update", params, socket) do
     # Log the received params for debugging
     Logger.warning("Received selection-entity-update with unexpected params: #{inspect(params)}")
@@ -873,7 +860,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     end
   end
 
-  @impl true
   def handle_info({:tiptap_content_updated, tab_id, content, formatted_content}, socket) do
     # Update the tab content in memory
     updated_tabs =
@@ -906,7 +892,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     {:noreply, assign(socket, tabs: updated_tabs)}
   end
 
-  @impl true
   def handle_info({:tiptap_entity_removed, tab_id, entity_id}, socket) do
     # Log the entity removal
     Logger.info("Entity #{entity_id} removed from tab #{tab_id}")
@@ -916,7 +901,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     {:noreply, socket}
   end
 
-  @impl true
   def handle_info(
         {:tiptap_entity_replaced, tab_id, entity_id, replacement, switched, original,
          display_text, color},
@@ -1029,7 +1013,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
 
         _ ->
           # If not the expected structure, return unchanged
-          Logger.warn("Could not update entity - invalid formatted content structure")
+          Logger.warning("Could not update entity - invalid formatted content structure")
           formatted_content
       end
     rescue
@@ -1117,7 +1101,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
       if is_map(formatted_content) && Map.has_key?(formatted_content, "content") do
         extract_colored_entities(formatted_content["content"], [], [])
       else
-        Logger.warn("Invalid formatted content structure for entity extraction")
+        Logger.warning("Invalid formatted content structure for entity extraction")
         []
       end
     rescue
@@ -1180,7 +1164,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
 
   # Handle text nodes with colored entity marks
   defp extract_colored_entities_from_block(
-         %{"type" => "text", "marks" => marks, "text" => text} = node,
+         %{"type" => "text", "marks" => marks, "text" => text},
          path,
          acc
        )
@@ -1221,7 +1205,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
   # Catch-all for any other node type
   defp extract_colored_entities_from_block(_, _, acc), do: acc
 
-  @impl true
   def handle_info(
         {:tiptap_entity_replaced, tab_id, entity_id, replacement, switched, original,
          display_text},
@@ -1236,7 +1219,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
   end
 
   # Further backward compatibility
-  @impl true
   def handle_info(
         {:tiptap_entity_replaced, tab_id, entity_id, replacement, switched, original},
         socket
@@ -1249,7 +1231,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
     )
   end
 
-  @impl true
   def handle_info({:tiptap_entity_restored, tab_id, entity_id}, socket) do
     # Log the entity restoration
     Logger.info("Processing entity restoration for #{entity_id} in tab #{tab_id}")
@@ -1272,7 +1253,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
       if updated_formatted_content != formatted_content do
         Logger.info("Entity #{entity_id} successfully marked as not deleted in formatted content")
       else
-        Logger.warn("No change in formatted content when restoring entity #{entity_id}")
+        Logger.warning("No change in formatted content when restoring entity #{entity_id}")
       end
 
       # Update the tab with the modified formatted content
@@ -1302,7 +1283,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.TiptapActions do
         })
       end
     else
-      Logger.warn("Tab #{tab_id} not found when restoring entity #{entity_id}")
+      Logger.warning("Tab #{tab_id} not found when restoring entity #{entity_id}")
     end
 
     {:noreply, socket}

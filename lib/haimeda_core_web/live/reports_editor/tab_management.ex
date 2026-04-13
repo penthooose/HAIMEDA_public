@@ -3,7 +3,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TabManagement do
   alias HaimedaCore.Report
   require Logger
 
-  @impl true
   def handle_event("save-content", %{"id" => tab_id, "value" => value}, socket) do
     Logger.info("Processing save-content event for tab #{tab_id}")
 
@@ -26,7 +25,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TabManagement do
     end
   end
 
-  @impl true
   def handle_event("select-tab", %{"id" => tab_id}, socket) do
     updates = handle_select_tab(socket, tab_id)
 
@@ -64,22 +62,18 @@ defmodule HaimedaCoreWeb.ReportsEditor.TabManagement do
     end
   end
 
-  @impl true
   def handle_event("close-tab", %{"id" => tab_id}, socket) do
     handle_close_tab(socket, tab_id)
   end
 
-  @impl true
   def handle_event("select-section-item", %{"id" => item_id, "category" => category}, socket) do
     handle_select_section_item(socket, item_id, category)
   end
 
-  @impl true
   def handle_event("add-tab", _params, socket) do
     add_tab_to_category(socket, "chapters")
   end
 
-  @impl true
   def handle_event("add-section-item", %{"category" => category}, socket) do
     add_tab_to_category(socket, category)
   end
@@ -167,9 +161,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.TabManagement do
     timestamp = :erlang.system_time(:millisecond)
     section_id = "section_#{timestamp}"
     tab_id = "tab_#{timestamp}"
-
-    section = Enum.find(socket.assigns.nav_sections, &(&1.id == category))
-    category_name = if section, do: section.title, else: "Kapitel"
 
     new_tab_title = "Neuer Eintrag"
 

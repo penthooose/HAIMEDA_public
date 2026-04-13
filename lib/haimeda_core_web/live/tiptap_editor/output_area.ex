@@ -1,6 +1,6 @@
 defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
   use HaimedaCoreWeb, :live_component
-  alias HaimedaCoreWeb.ReportsEditor.{ContentPersistence, TipTapEditor}
+  alias HaimedaCoreWeb.ReportsEditor.ContentPersistence
   require Logger
 
   @impl true
@@ -666,7 +666,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
   end
 
   @impl true
-  def update(%{ai_correction_disabled: state} = assigns, socket) do
+  def update(%{ai_correction_disabled: state}, socket) do
     socket = assign(socket, :ai_correction_disabled, state)
 
     send(socket.parentPid, {:update_button_state, :ai_correction_disabled, state})
@@ -675,7 +675,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
   end
 
   @impl true
-  def update(%{confirm_changes_disabled: state} = assigns, socket) do
+  def update(%{confirm_changes_disabled: state}, socket) do
     socket = assign(socket, :confirm_changes_disabled, state)
 
     send(socket.parentPid, {:update_button_state, :confirm_changes_disabled, state})
@@ -684,7 +684,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
   end
 
   @impl true
-  def update(%{discard_changes_disabled: state} = assigns, socket) do
+  def update(%{discard_changes_disabled: state}, socket) do
     socket = assign(socket, :discard_changes_disabled, state)
 
     send(socket.parentPid, {:update_button_state, :discard_changes_disabled, state})
@@ -693,7 +693,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
   end
 
   @impl true
-  def update(%{auto_chapter_disabled: state} = assigns, socket) do
+  def update(%{auto_chapter_disabled: state}, socket) do
     socket = assign(socket, :auto_chapter_disabled, state)
 
     send(socket.parentPid, {:update_button_state, :auto_chapter_disabled, state})
@@ -702,7 +702,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
   end
 
   @impl true
-  def update(%{manual_verification_disabled: state} = assigns, socket) do
+  def update(%{manual_verification_disabled: state}, socket) do
     socket = assign(socket, :manual_verification_disabled, state)
 
     send(socket.parentPid, {:update_button_state, :manual_verification_disabled, state})
@@ -711,7 +711,7 @@ defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
   end
 
   @impl true
-  def update(%{ai_optimize_disabled: state} = assigns, socket) do
+  def update(%{ai_optimize_disabled: state}, socket) do
     socket = assign(socket, :ai_optimize_disabled, state)
 
     send(socket.parentPid, {:update_button_state, :ai_optimize_disabled, state})
@@ -724,12 +724,10 @@ defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
     {:ok, assign(socket, assigns)}
   end
 
-  @impl true
   def handle_info({:update_textarea_field, content}, socket) do
     handle_info({:update_textarea_field, content, "writable"}, socket)
   end
 
-  @impl true
   def handle_info({:set_textarea_mode, mode}, socket) do
     tab_id = socket.assigns.active_tab
     tab = Enum.find(socket.assigns.tabs, &(&1.id == tab_id))
@@ -819,8 +817,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
   def handle_event("previous-version", _params, socket) do
     case navigate_to_previous_version(socket) do
       {:ok, updated_socket} ->
-        tab_id = updated_socket.assigns.active_tab
-
         content =
           Enum.at(
             updated_socket.assigns.versions,
@@ -841,8 +837,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
   def handle_event("next-version", _params, socket) do
     case navigate_to_next_version(socket) do
       {:ok, updated_socket} ->
-        tab_id = updated_socket.assigns.active_tab
-
         content =
           Enum.at(
             updated_socket.assigns.versions,
@@ -874,8 +868,6 @@ defmodule HaimedaCoreWeb.ReportsEditor.OutputArea do
   def handle_event("discard-changes", _params, socket) do
     case discard_changes(socket) do
       {:ok, updated_socket} ->
-        tab_id = updated_socket.assigns.active_tab
-
         content =
           Enum.at(
             updated_socket.assigns.versions,
