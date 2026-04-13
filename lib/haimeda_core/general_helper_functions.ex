@@ -83,4 +83,8 @@ defmodule HaimedaCore.GeneralHelperFunctions do
   def get_auto_quantized_models_setting do
     Application.get_env(:haimeda_core, :auto_quantized_models, false)
   end
+
+  def get_auto_pull_ollama_models_setting do
+    Application.get_env(:haimeda_core, :auto_pull_ollama_models, false)
+  end
 end

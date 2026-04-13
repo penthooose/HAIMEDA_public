@@ -643,6 +643,9 @@ defmodule HaimedaCore.MainController do
     auto_quantized_models =
       get_application_properties(["LLMs", "auto_switch_to_quantized_models"])
 
+    auto_pull_ollama_models =
+      get_application_properties(["LLMs", "auto_pull_ollama_models"])
+
     disable_hybrid_postprocessing =
       get_application_properties(["IIVM", "disable_hybrid_postprocessing"])
 
@@ -665,6 +668,7 @@ defmodule HaimedaCore.MainController do
     Application.put_env(:haimeda_core, :show_performance_outputs, show_performance_outputs)
     Application.put_env(:haimeda_core, :verbose_console_output, verbose_console_output)
     Application.put_env(:haimeda_core, :auto_quantized_models, auto_quantized_models)
+    Application.put_env(:haimeda_core, :auto_pull_ollama_models, auto_pull_ollama_models)
 
     Application.put_env(
       :haimeda_core,

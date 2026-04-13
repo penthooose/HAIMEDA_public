@@ -210,76 +210,79 @@ defmodule RIM.VectorPersistence do
     Process.put(:chunking_subcollections, chunking_subcollections)
 
     # check model availability
-    case OllamaService.pull_model_if_not_available(embedding_model) do
-      {:ok, model_name} ->
-        Process.put(:embedding_model, model_name)
-        model_name
+    with {:ok, model_name} <- OllamaService.pull_model_if_not_available(embedding_model) do
+      Process.put(:embedding_model, model_name)
 
-      {:error, :model_not_avilable} ->
+      case only_vector_db do
+        true ->
+          # Check if vectors collection exists and is not empty
+          conn = Repo.get_conn()
+
+          # Try to find at least one document in the vectors collection
+          case Mongo.find(conn, @vectors_collection, %{}) |> Enum.take(1) do
+            [] ->
+              Logger.error("Vectors collection is empty or does not exist.")
+              {:error, :vectors_collection_empty}
+
+            [_doc | _] ->
+              Logger.info("Vectors collection exists and is not empty.")
+              {:ok, "Vectors collection exists"}
+          end
+
+        false ->
+          if !File.dir?(parent_dir) do
+            Logger.error("Parent directory for RAG files does not exist: #{parent_dir}")
+            {:error, :invalid_directory}
+          else
+            # Check if parent_dir exists in RAG collection
+            case check_parent_dir_in_db(parent_dir) do
+              {:ok, true} ->
+                Logger.info("Parent directory #{parent_dir} already exists in database")
+
+                # Verify subcollections exist
+                verify_subcollections(parent_dir, subcollections)
+
+                # If tracking enabled, synchronize with file system
+                if enable_tracking do
+                  VectorMaintenance.synchronize_vector_database(
+                    parent_dir,
+                    subcollections,
+                    embedding_model,
+                    chunking_subcollections
+                  )
+                end
+
+                {:ok, "Vector collections verified"}
+
+              {:ok, false} ->
+                # Parent directory doesn't exist, create all structures
+                Logger.info("Creating new vector collections for #{parent_dir}")
+
+                # Create parent directory entry in RAG collection
+                create_parent_dir_entry(parent_dir)
+
+                # Create subcollections
+                create_subcollections(parent_dir, subcollections)
+
+                # Process all subfolders and files
+                process_parent_dir(parent_dir, subcollections, embedding_model)
+
+                {:ok, "Vector collections created"}
+
+              {:error, reason} ->
+                Logger.error("Error checking parent directory in database: #{reason}")
+                {:error, reason}
+            end
+          end
+      end
+    else
+      {:error, :model_not_available} ->
         Logger.error("Model #{embedding_model} is not available.")
         {:error, :embedding_model_not_available}
-    end
 
-    case only_vector_db do
-      true ->
-        # Check if vectors collection exists and is not empty
-        conn = Repo.get_conn()
-        # Try to find at least one document in the vectors collection
-        case Mongo.find(conn, @vectors_collection, %{}) |> Enum.take(1) do
-          [] ->
-            Logger.error("Vectors collection is empty or does not exist.")
-            {:error, :vectors_collection_empty}
-
-          [_doc | _] ->
-            Logger.info("Vectors collection exists and is not empty.")
-            {:ok, "Vectors collection exists"}
-        end
-
-      false ->
-        if !File.dir?(parent_dir) do
-          Logger.error("Parent directory for RAG files does not exist: #{parent_dir}")
-          {:error, :invalid_directory}
-        else
-          # Check if parent_dir exists in RAG collection
-          case check_parent_dir_in_db(parent_dir) do
-            {:ok, true} ->
-              Logger.info("Parent directory #{parent_dir} already exists in database")
-
-              # Verify subcollections exist
-              verify_subcollections(parent_dir, subcollections)
-
-              # If tracking enabled, synchronize with file system
-              if enable_tracking do
-                VectorMaintenance.synchronize_vector_database(
-                  parent_dir,
-                  subcollections,
-                  embedding_model,
-                  chunking_subcollections
-                )
-              end
-
-              {:ok, "Vector collections verified"}
-
-            {:ok, false} ->
-              # Parent directory doesn't exist, create all structures
-              Logger.info("Creating new vector collections for #{parent_dir}")
-
-              # Create parent directory entry in RAG collection
-              create_parent_dir_entry(parent_dir)
-
-              # Create subcollections
-              create_subcollections(parent_dir, subcollections)
-
-              # Process all subfolders and files
-              process_parent_dir(parent_dir, subcollections, embedding_model)
-
-              {:ok, "Vector collections created"}
-
-            {:error, reason} ->
-              Logger.error("Error checking parent directory in database: #{reason}")
-              {:error, reason}
-          end
-        end
+      {:error, reason} ->
+        Logger.error("Failed to verify model availability: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 

@@ -13,6 +13,7 @@ LLMs:
   # if true, and the systems detects that there is not enough VRAM available for the LLM,
   # it will try to use the same model with quantization
   - auto_switch_to_quantized_models: true
+  - auto_pull_ollama_models: false
   # overwriting and integrating models can be quiet time-consuming,
   # only set this to true if models with same name have been updated
   - overwrite_existing_ollama_models_with_same_name: false
