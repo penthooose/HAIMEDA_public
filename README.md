@@ -6,6 +6,11 @@ For more details on the system, see `HAIMEDA_documentation.md`.
 
 Information regarding Fine-Tuning and System Configuration can be found in `HAIMEDA_technical_documentation.pdf`.
 
+### Setup
+
+Install required NPM packages:
+
+`npm install @tiptap/core @tiptap/starter-kit @tiptap/extension-placeholder`
 
 
 ---
